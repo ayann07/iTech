@@ -1,5 +1,3 @@
-iNeuron Internship Project: E-commerce Application Clone
-
 Deployment link of the project: https://itechstore.netlify.app/
 
 Technology Used: React Js
