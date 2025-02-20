@@ -79,7 +79,6 @@ public class OrderServiceImpl implements OrderService {
 
         Order order = Order.builder()
                 .user(user)
-                .address(orderRequest.getShippingAddress())
                 .paymentStatus(PaymentStatus.PENDING)
                 .orderStatus(OrderStatus.PENDING)
                 .build();
@@ -101,11 +100,10 @@ public class OrderServiceImpl implements OrderService {
                     .order(order)
                     .product(product)
                     .quantity(itemRequest.getQuantity())
-                    .price(calculateSubPrice)
+                    .subPrice(calculateSubPrice)
                     .build();
-            orderItems.add(orderItem);
 
-            product.setStock(product.getStock() - itemRequest.getQuantity());
+            orderItems.add(orderItem);
             totalOrderPrice = totalOrderPrice.add(calculateSubPrice);
         }
         order.setTotalPrice(totalOrderPrice);

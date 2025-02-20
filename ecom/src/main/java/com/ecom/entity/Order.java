@@ -10,6 +10,7 @@ import com.ecom.entity.enums.OrderStatus;
 import com.ecom.entity.enums.PaymentStatus;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -79,5 +80,8 @@ public class Order {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    @Column(unique = true)
+    private String paymentSessionId;
 
 }

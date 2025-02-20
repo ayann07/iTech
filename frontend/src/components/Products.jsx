@@ -3,26 +3,6 @@ import ProductCard from "./ProductCard";
 import toast from "react-hot-toast";
 import { BASE_URL } from "../main";
 
-const sampleProducts = [
-    {
-        id: 1,
-        name: "MacBook Pro 16”",
-        description: "Powerful M2 chip, stunning Retina display, and a sleek aluminum design.",
-        price: 2399,
-    },
-    {
-        id: 2,
-        name: "iPhone 14 Pro",
-        description: "A16 Bionic chip, 48MP camera, and Dynamic Island for a new iPhone experience.",
-        price: 1099,
-    },
-    {
-        id: 3,
-        name: "iPad Air",
-        description: "Lightweight, powerful, and perfect for both work and entertainment.",
-        price: 599,
-    },
-];
 
 const Products = () => {
     const [products,setProducts]=useState([]);

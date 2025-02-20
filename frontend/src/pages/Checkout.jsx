@@ -1,28 +1,63 @@
-import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import React from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { clearOrder } from "../redux/orderSlice"
+import { BASE_URL } from "../main";
+import toast from "react-hot-toast";
 
 const Checkout = () => {
   const { orderItems } = useSelector((state) => state.order);
+  const {authToken} = useSelector((state)=>state.user)
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  // State for user inputs
-  const [paymentMethod, setPaymentMethod] = useState("");
-  const [address, setAddress] = useState("");
-
-  // Calculate total price
   const totalPrice = orderItems.reduce((acc, item) => acc + item.subTotal, 0);
 
-  const handleProceed = () => {
-    if (!paymentMethod || !address) {
-      alert("Please fill in all fields before proceeding.");
-      return;
+  const handleProceedToPayment = async () => {
+    try {
+      const orderData = {
+        orderItems: orderItems.map(({ productId, quantity }) => ({
+          productId,
+          quantity,
+        })),
+      };
+      const res = await fetch(`${BASE_URL}/orders/place`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken
+        },
+        body: JSON.stringify(orderData)
+      })
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error("Some error occured while placing order");
+      }
+      let orderId = data.data.id;
+
+      const res2 = await fetch(`${BASE_URL}/stripe/create-checkout-session/${orderId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken
+        }
+      })
+      if (!res2.ok) {
+        toast.error("Some error occured while processing payment");
+      }
+      const data2 = await res2.json();
+      const checkoutUrl = data2.data.sessionUrl;
+      window.location.href = checkoutUrl;
+    }
+    catch (error) {
+      toast.error(error.message || 'An unexpected error occurred');
     }
 
-    // Redirect to payment page with order details
-    navigate("/payment", {
-      state: { orderItems, paymentMethod, address, totalPrice },
-    });
+  };
+
+  const handleCancel = () => {
+    dispatch(clearOrder())
+    navigate("/");
   };
 
   return (
@@ -53,38 +88,21 @@ const Checkout = () => {
         <p className="text-center text-lg text-gray-500">No items in your order.</p>
       )}
 
-      {/* Payment & Address Section */}
-      <div className="mt-8 bg-white p-6 rounded-xl shadow-md">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">Payment & Address</h3>
-
-        <label className="block text-gray-700 font-medium">Payment Method:</label>
-        <select
-          value={paymentMethod}
-          onChange={(e) => setPaymentMethod(e.target.value)}
-          className="w-full p-3 mt-2 border rounded-lg focus:ring-2 focus:ring-blue-400 transition"
+      {/* Action Buttons */}
+      <div className="flex justify-center gap-4 mt-6">
+        <button
+          onClick={handleCancel}
+          className="border-2 border-gray-800 font-semibold py-2 px-6 rounded-full bg-gray-800 text-white transition ease-in-out duration-300 "
         >
-          <option value="">Select Payment Method</option>
-          <option value="credit_card">Credit Card</option>
-          <option value="paypal">PayPal</option>
-          <option value="cash_on_delivery">Cash on Delivery</option>
-        </select>
+          Cancel
+        </button>
+        <button
+          onClick={handleProceedToPayment}
+          className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white py-2 px-6 rounded-full hover:from-indigo-700 hover:to-purple-700 transition ease-in-out duration-300"
+        >
+          Proceed to Payment
+        </button>
 
-        <label className="block mt-6 text-gray-700 font-medium">Delivery Address:</label>
-        <textarea
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder="Enter your full address"
-          className="w-full p-3 mt-2 border rounded-lg focus:ring-2 focus:ring-blue-400 transition"
-        />
-
-<div className="flex justify-center mt-6">
-  <button
-    onClick={handleProceed}
-    className="flex items-center bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white py-2 px-6 rounded-full hover:from-indigo-700 hover:to-purple-700 transition ease-in-out duration-300"
-  >
-    Proceed to Payment
-  </button>
-</div>
 
       </div>
     </div>

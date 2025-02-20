@@ -31,7 +31,7 @@ const Cart = () => {
                 const res = await fetch(`${BASE_URL}/cart`, {
                     method: "GET",
                     headers: {
-                        "Authorization": authToken
+                        "Authorization": authToken,
                     }
                 });
 
@@ -161,9 +161,8 @@ const Cart = () => {
             if (!res.ok) {
                 throw new Error("Failed to clear cart");
             }
-
             setCartItems([])
-            // await refreshCart(); // Sync data with the backend after clearing the cart
+
         } catch (err) {
             setError("Error clearing cart");
             console.error("Error clearing cart:", err);
